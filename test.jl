@@ -17,9 +17,17 @@ var = [a, b, c]
 
 objFunc = MOI.ScalarAffineFunction(MOI.ScalarAffineTerm.(map(c -> c, coeff), map(v -> v, var)), 0)
 
-model.objective_function = objFunc
+#model.objective_function = objFunc
 
-model.objective_sense = MOI.MAX_SENSE
+#model.objective_sense = MOI.MAX_SENSE
+
+MOI.set(model, MOI.ObjectiveSense(), MOI.MAX_SENSE)
+MOI.set(model, MOI.ObjectiveFunction{typeof(objFunc)}(), objFunc)
+
+#MOI.set(model, MOI.TimeLimitSec, 70)
+#MOI.set(model, MOI.RawParameter("CPX_PARAM_TILIM"), 3600)
+MOI.set(model, MOI.Silent, true)
+
 
 MOI.optimize!(model)
 
