@@ -1,4 +1,5 @@
 [deps]
 CPLEXCP = "cf5b58c4-1b5d-4a07-a0a4-f2f6c3ca5a5f"
 ConstraintProgrammingExtensions = "b65d079e-ed98-51d9-b0db-edee61a5c5f8"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
