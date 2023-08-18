@@ -25,10 +25,17 @@ MOI.set(model, MOI.ObjectiveSense(), MOI.MAX_SENSE)
 MOI.set(model, MOI.ObjectiveFunction{typeof(objFunc)}(), objFunc)
 
 time_limit = 10
-#MOI.set(model, MOI.NumberOfThreads(), 1)
-#MOI.set(model, MOI.Silent(), true)
-#MOI.set(model, MOI.TimeLimitSec(), time_limit)
 
+#MOI.set(model, MOI.NumberOfThreads(), 1)
+param = CPLEXCP.jfield(CPLEXCP.IloIntParam, "Workers", CPLEXCP.IloIntParam)
+CPLEXCP.jcall(model.inner.cp, "setParameter", Nothing, (CPLEXCP.IloIntParam, CPLEXCP.jint), param, 1)
+
+
+#MOI.set(model, MOI.TimeLimitSec(), time_limit)
+param = CPLEXCP.jfield(CPLEXCP.IloDoubleParam, "TimeLimit", CPLEXCP.IloDoubleParam)
+CPLEXCP.jcall(model.inner.cp, "setParameter", Nothing, (CPLEXCP.IloDoubleParam, CPLEXCP.jdouble), param, Float64(time_limit))
+
+#MOI.set(model, MOI.Silent(), true)
 
 MOI.optimize!(model)
 
