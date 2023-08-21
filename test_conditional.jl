@@ -9,29 +9,26 @@ model = CPLEXCP.Optimizer()
 
 x = first(MOI.add_constrained_variable(model, MOI.Integer()))
 p = first(MOI.add_constrained_variable(model, MOI.Integer()))
-q = first(MOI.add_constrained_variable(model, MOI.Interval(0.0, 10.0)))
+q = first(MOI.add_constrained_variable(model, MOI.Integer()))
 
+# if x = 10 then p + 5 = q
 
-coeff = [5.0, 4.0, 7.0]
-var = [x, p, q]
+# p - q
+affine::MOI.ScalarAffineFunction{Int64} = MOI.ScalarAffineFunction(MOI.ScalarAffineTerm{Int64}.([1, -1], [p, q]), 0)
 
-objFunc = MOI.ScalarAffineFunction(MOI.ScalarAffineTerm.(map(c -> c, coeff), map(v -> v, var)), 0.0)
+# [x, p - q]
+terms::MOI.VectorAffineFunction{Int64} = MOI.Utilities.operate(vcat, Int64, x, affine)
 
-model.objective_function = objFunc
+# [10, - 5]
+implication::CP.Implication{MOI.EqualTo{Int64}, MOI.EqualTo{Int64}} = CP.Implication(MOI.EqualTo(10), MOI.EqualTo(-5))
 
-model.objective_sense = MOI.MAX_SENSE
+# x = 10 => p - q = - 5
+MOI.add_constraint(model, terms, implication)
 
-MOI.set(model, MOI.ObjectiveSense(), MOI.MAX_SENSE)
-MOI.set(model, MOI.ObjectiveFunction{typeof(objFunc)}(), objFunc)
+MOI.add_constraint(model, x, MOI.EqualTo(10))
 
-affine::MOI.ScalarAffineFunction{Float64} = MOI.ScalarAffineFunction(MOI.ScalarAffineTerm{Float64}.([1, -1], [p, q]), 0.0)
-
-
-MOI.add_constraint(
-                   model,
-                   MOI.Utilities.operate(vcat, MOI.ScalarAffineFunction{Float64}, MOI.SingleVariable(x), affine),
-                   CP.Implication(MOI.EqualTo(10), MOI.EqualTo(-5)),
-                  )
+MOI.add_constraint(model, p, MOI.GreaterThan(0))
+MOI.add_constraint(model, p, MOI.LessThan(10))
 
 MOI.optimize!(model)
 
